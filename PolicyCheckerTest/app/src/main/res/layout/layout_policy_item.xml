@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <CheckBox
+        android:text=""
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/chkPassed"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:paddingBottom="0dp"
+        android:paddingTop="0dp" />
+
+</LinearLayout>
+

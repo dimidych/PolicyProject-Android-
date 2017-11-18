@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Policy Service Starter</string>
+
+    <string name="navigation_drawer_open">Открыть</string>
+    <string name="navigation_drawer_close">Закрыть</string>
+
+    <string name="action_settings">Настройки</string>
+    <string name="action_network_settings">Настройки сети</string>
+    <string name="action_get_cert">Запрос сертификата</string>
+    <string name="action_check_policies">Проверка политик</string>
+    <string name="action_service">Запуск/остановка службы</string>
+    <string name="action_about">О программе...</string>
+
+    <string name="lblEmail">dimidych@gmail.com</string>
+    <string name="lblAuthor">Автор : Кожомин Дмитрий</string>
+    <string name="lblEula">(С) Все права защищены</string>
+
+    <string name="ip_addr">IP адрес</string>
+    <string name="port">Порт</string>
+    <string name="result">Результат</string>
+    <string name="action_ping">Пинг</string>
+    <string name="action_start_service">Запустить службу</string>
+    <string name="action_stop_service">Остановить службу</string>
+    <string name="action_test_service">Запрос</string>
+    <string name="action_save">Сохранить</string>
+</resources>

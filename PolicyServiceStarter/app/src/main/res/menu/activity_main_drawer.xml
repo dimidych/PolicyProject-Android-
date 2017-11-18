@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_network_settings"
+            android:icon="@drawable/ic_tap_and_play_black_24dp"
+            android:title="@string/action_network_settings" />
+        <item
+            android:id="@+id/nav_get_cert"
+            android:icon="@drawable/ic_security_black_24dp"
+            android:title="@string/action_get_cert" />
+        <item
+            android:id="@+id/nav_check_policies"
+            android:icon="@drawable/ic_vpn_key_black_24dp"
+            android:title="@string/action_check_policies" />
+        <item
+            android:id="@+id/nav_service"
+            android:icon="@drawable/ic_touch_app_black_24dp"
+            android:title="@string/action_service" />
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_announcement_black_24dp"
+            android:title="@string/action_about" />
+    </group>
+
+</menu>

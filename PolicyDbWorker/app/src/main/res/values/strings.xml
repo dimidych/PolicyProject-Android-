@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PolicyDbWorker</string>
+    <string name="device_admin_description">Controls admin polcy execution</string>
+    <string name="device_admin">Device policy admin</string>
+</resources>

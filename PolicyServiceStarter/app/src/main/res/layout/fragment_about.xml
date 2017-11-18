@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+    tools:context="com.dimidych.policyservicestarter.AboutFragment">
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:contentDescription="@string/lblEmail"
+        android:src="@mipmap/dimidrol_small" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:id="@+id/lblAuthor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lblAuthor"
+            android:layout_margin="3dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/lblEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lblEmail"
+            android:layout_margin="3dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/lblEula"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lblEula"
+            android:layout_margin="3dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_gravity="center" />
+
+    </LinearLayout>
+
+</LinearLayout>

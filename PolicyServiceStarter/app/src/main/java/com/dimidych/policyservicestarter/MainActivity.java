@@ -80,7 +80,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_network_settings) {
             fragment = new NetworkFragment(fragmentManager);
             _toolbar.setTitle(getString(R.string.action_network_settings));
-        } else if (id == R.id.nav_service) {
+        } else if (id == R.id.nav_logs) {
+            fragment = new LogViewerFragment(fragmentManager);
+            _toolbar.setTitle(getString(R.string.action_logs));
+        }else if (id == R.id.nav_service) {
             fragment = new ServiceFragment(fragmentManager);
             _toolbar.setTitle(getString(R.string.action_service));
         }

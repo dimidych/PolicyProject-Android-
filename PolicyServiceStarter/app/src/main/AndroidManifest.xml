@@ -20,6 +20,10 @@ xmlns:tools="http://schemas.android.com/tools"
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name=".PolicyService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

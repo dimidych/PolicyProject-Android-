@@ -10,6 +10,8 @@ import android.util.Log;
 
 import com.dimidych.policydbworker.mvp.ICheckPolicyModelOps;
 import com.dimidych.policydbworker.mvp.ICheckPolicyPresenterRequiredOps;
+import com.dimidych.policydbworker.mvp.IEventLogModelOps;
+import com.dimidych.policydbworker.mvp.IEventLogPresenterRequiredOps;
 import com.dimidych.policydbworker.mvp.IGetCertModelOps;
 import com.dimidych.policydbworker.mvp.IGetCertPresenterRequiredOps;
 import com.dimidych.policydbworker.mvp.INetworkModelOps;
@@ -18,38 +20,41 @@ import com.dimidych.policydbworker.mvp.INetworkPresenterRequiredOps;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGetCertModelOps, ICheckPolicyModelOps {
+public class DbWorker extends SQLiteOpenHelper
+        implements INetworkModelOps, IGetCertModelOps, ICheckPolicyModelOps, IEventLogModelOps {
     private static final String LOG_TAG = "DbWorker";
-    private Context _context = null;
-    public SQLiteDatabase CurrentDb = null;
-    public INetworkPresenterRequiredOps _networkPresenter;
-    public IGetCertPresenterRequiredOps _getCertPresenter;
-    public ICheckPolicyPresenterRequiredOps _checkPolicyPresenter;
+    public Context Context = null;
+    private SQLiteDatabase CurrentDb = null;
+    private INetworkPresenterRequiredOps _networkPresenter;
+    private IGetCertPresenterRequiredOps _getCertPresenter;
+    private ICheckPolicyPresenterRequiredOps _checkPolicyPresenter;
+    private IEventLogPresenterRequiredOps _eventLogPresenter;
 
-    public static final String PolicySetIdFld = "policy_set_id";
-    public static final String PolicyIdFld = "policy_id";
-    public static final String LoginIdFld = "login_id";
-    public static final String GroupIdFld = "group_id";
-    public static final String PolicyNameFld = "policy_name";
-    public static final String PolicyInstructionFld = "policy_instruction";
-    public static final String PlatformIdFld = "platform_id";
-    public static final String PolicyParamFld = "policy_param";
+    private static final String PolicySetIdFld = "policy_set_id";
+    private static final String PolicyIdFld = "policy_id";
+    private static final String LoginIdFld = "login_id";
+    private static final String GroupIdFld = "group_id";
+    private static final String PolicyNameFld = "policy_name";
+    private static final String PolicyInstructionFld = "policy_instruction";
+    private static final String PlatformIdFld = "platform_id";
+    private static final String PolicyParamFld = "policy_param";
 
     public static final String EventLogIdFld = "event_log_id";
     public static final String EventLogDateFld = "event_log_date";
-    public static final String DocumentIdFld = "document_id";
-    public static final String MessageFld = "message";
-    public static final String LoginFld = "login";
-    public static final String EventNameFld = "event_name";
+    private static final String DocumentIdFld = "document_id";
+    private static final String MessageFld = "message";
+    private static final String LoginFld = "login";
+    private static final String EventNameFld = "event_name";
 
     public DbWorker(Context context) {
         super(context, "policySvc", null, 1);
-        _context = context;
+        Context = context;
         CurrentDb = getWritableDatabase();
     }
 
@@ -68,30 +73,28 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
         _checkPolicyPresenter = checkPolicyPresenter;
     }
 
+    public DbWorker(Context context, IEventLogPresenterRequiredOps eventLogPresenter) {
+        this(context);
+        _eventLogPresenter = eventLogPresenter;
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         try {
-            //Toast.makeText(_context, "Try to create DB POLICYSVC", Toast.LENGTH_LONG).show();
             Log.d(LOG_TAG, "Пытаемся создать БД POLICYSVC");
             db.beginTransactionNonExclusive();
 
             try {
                 db.execSQL("CREATE TABLE CONNECTION_TBL (host_ip TEXT NOT NULL, host_port TEXT NOT NULL, cert TEXT NOT NULL);");
-                //Toast.makeText(_context, "Try to create table CONNECTION_TBL", Toast.LENGTH_LONG).show();
                 Log.d(LOG_TAG, "Таблица CONNECTION_TBL создана");
-
                 db.execSQL("CREATE TABLE POLICY_SET_TBL (policy_set_id INTEGER PRIMARY KEY, " +
                         "policy_id INTEGER, login_id INTEGER, group_id INTEGER, login TEXT, " +
                         "policy_name TEXT, policy_instruction TEXT, platform_id INTEGER, policy_param TEXT);");
-                //Toast.makeText(_context, "Try to create table EXPENSE_TBL", Toast.LENGTH_LONG).show();
                 Log.d(LOG_TAG, "Таблица POLICY_SET_TBL создана");
-
                 db.execSQL("CREATE TABLE EVENT_LOG_TBL (event_log_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "event_log_date DATETIME NOT NULL DEFAULT(DATETIME('now', 'localtime')), " +
                         "event_name TEXT,document_id INTEGER, message TEXT, login TEXT);");
-                //Toast.makeText(_context, "Try to create table EVENT_LOG_TBL", Toast.LENGTH_LONG).show();
                 Log.d(LOG_TAG, "Таблица EVENT_LOG_TBL создана");
-
                 db.setTransactionSuccessful();
             } catch (Exception ex) {
                 String strErr = "Ошибка транзакции создания БД - " + ex.getMessage();
@@ -115,15 +118,13 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
 
             makePackageInsert("CONNECTION_TBL", paramTypeValueCollection);
             paramTypeValueCollection.clear();
-            //Toast.makeText(_context, "Добавляем начальные данные в таблицу CONNECTION_TBL", Toast.LENGTH_LONG).show();
             Log.d(LOG_TAG, "Добавляем начальные данные в таблицу CONNECTION_TBL");
-            //Toast.makeText(_context, "БД POLICYSVC создана", Toast.LENGTH_LONG).show();
             Log.d(LOG_TAG, "БД POLICYSVC создана");
         } catch (Exception ex) {
             Log.d(LOG_TAG, ex.getMessage());
-            //Toast.makeText(_context, "Ошибка создания БД - " + ex.getMessage(), Toast.LENGTH_LONG).show();
             return;
         } finally {
+            onSetLog("БД POLICYSVC создана", "Success", -1);
         }
     }
 
@@ -139,6 +140,11 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
 
     public void onDestroy() {
         close();
+    }
+
+    @Override
+    public void onSetLog(String message, String eventName, long documentId) {
+        setEventLog(new EventLogDataContract(documentId, message, "", eventName));
     }
 
     public boolean makePackageInsert(String strTableName, ArrayList<HashMap<String, String>> paramTypeValueCollection) {
@@ -178,8 +184,9 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
 
             result = true;
         } catch (Exception ex) {
-            String strErr = "Ошибка пакетной вставки - " + ex.getMessage();
+            String strErr = " Ошибка пакетной вставки - " + ex.getMessage();
             Log.e(LOG_TAG, strErr);
+            onSetLog(LOG_TAG + strErr, "Error", -1);
             return false;
         }
 
@@ -202,9 +209,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
                 return new AbstractMap.SimpleEntry<String, String>(serverIpAddress, serverPort);
             }
         } catch (Exception ex) {
-            String error = "Ошибка получения настроек подключения - " + ex.getMessage();
+            String error = " Ошибка получения настроек подключения - " + ex.getMessage();
             _networkPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             if (reader != null && !reader.isClosed())
                 reader.close();
@@ -220,9 +228,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
             cv.put("host_port", port);
             return CurrentDb.update("CONNECTION_TBL", cv, null, null) > 0;
         } catch (Exception ex) {
-            String error = "Ошибка изменения настроек соединения - " + ex.getMessage();
+            String error = " Ошибка изменения настроек соединения - " + ex.getMessage();
             _networkPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             _networkPresenter.onUpdateConnectionSettings(ipAddress, port);
         }
@@ -240,9 +249,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
             if (reader.moveToFirst())
                 return reader.getString(0);
         } catch (Exception ex) {
-            String error = "Ошибка получения сертификата - " + ex.getMessage();
+            String error = " Ошибка получения сертификата - " + ex.getMessage();
             _getCertPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             if (reader != null && !reader.isClosed())
                 reader.close();
@@ -257,9 +267,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
             cv.put("cert", certifiate);
             return CurrentDb.update("CONNECTION_TBL", cv, null, null) > 0;
         } catch (Exception ex) {
-            String error = "Ошибка изменения набора политик - " + ex.getMessage();
+            String error = " Ошибка изменения набора политик - " + ex.getMessage();
             _getCertPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             _getCertPresenter.onUpdateCertificate(certifiate);
         }
@@ -280,9 +291,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
             cv.put(PolicyParamFld, policySet.PolicyParam);
             return CurrentDb.insert("POLICY_SET_TBL", null, cv) > 0;
         } catch (Exception ex) {
-            String error = "Ошибка добавления набора политик - " + ex.getMessage();
+            String error = " Ошибка добавления набора политик - " + ex.getMessage();
             _checkPolicyPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             _checkPolicyPresenter.onAddPolicySetToDb(policySet);
         }
@@ -321,9 +333,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
             return CurrentDb.update("POLICY_SET_TBL", cv, DbWorker.PolicySetIdFld + "=?",
                     new String[]{"" + servicePolicySet.PolicySetId}) > 0;
         } catch (Exception ex) {
-            String error = "Ошибка изменения набора политик - " + ex.getMessage();
+            String error = " Ошибка изменения набора политик - " + ex.getMessage();
             _checkPolicyPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             _checkPolicyPresenter.onUpdatePolicySet(servicePolicySet, dbPolicySet);
         }
@@ -358,9 +371,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
                 return result;
             }
         } catch (Exception ex) {
-            String error = "Ошибка получения набора политик - " + ex.getMessage();
+            String error = " Ошибка получения набора политик - " + ex.getMessage();
             _checkPolicyPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             if (reader != null && !reader.isClosed())
                 reader.close();
@@ -433,9 +447,10 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
             PolicySetDataContract[] result = new PolicySetDataContract[policySetLst.size()];
             return policySetLst.toArray(result);
         } catch (Exception ex) {
-            String error = "Ошибка получения набора политик - " + ex.getMessage();
+            String error = " Ошибка получения набора политик - " + ex.getMessage();
             _checkPolicyPresenter.onError(error);
             Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             if (reader != null && !reader.isClosed())
                 reader.close();
@@ -444,23 +459,40 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
         return null;
     }
 
-    public EventLogDataContract[] getEventLog(long fromDateInMillis, long toDateInMillis, long documentId, String eventName) {
+    public EventLogDataContract[] getEventLog(String fromDate, String toDate, long documentId, String eventName) {
         Cursor reader = null;
 
         try {
             String query = "select event_log_id, event_log_date, event_name, document_id, message, login from EVENT_LOG_TBL ";
             int paramCounter = 0;
             String[] queryParams = new String[4];
+            Calendar fromCalendar = Calendar.getInstance();
+            Calendar toCalendar = Calendar.getInstance();
+            long fromDateInMillis = 0;
+            long toDateInMillis = 0;
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            try {
+                fromCalendar.setTime(sdf.parse(fromDate));
+                fromDateInMillis = fromCalendar.getTimeInMillis();
+            } catch (Exception ex) {
+            }
+
+            try {
+                toCalendar.setTime(sdf.parse(toDate));
+                toDateInMillis = toCalendar.getTimeInMillis();
+            } catch (Exception ex) {
+            }
 
             if (fromDateInMillis > 0) {
                 query += paramCounter > 0 ? " and event_log_date>=?" : " where event_log_date>=?";
-                queryParams[paramCounter] = "" + fromDateInMillis;
+                queryParams[paramCounter] = fromDate;
                 paramCounter++;
             }
 
             if (toDateInMillis > 0 && toDateInMillis > fromDateInMillis) {
                 query += paramCounter > 0 ? " and event_log_date<=?" : " where event_log_date<=?";
-                queryParams[paramCounter] = "" + toDateInMillis;
+                queryParams[paramCounter] = toDate;
                 paramCounter++;
             }
 
@@ -498,7 +530,9 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
                 } while (reader.moveToNext());
             }
         } catch (Exception ex) {
-            Log.e(LOG_TAG, "Ошибка получения лога событий - " + ex.getMessage());
+            String error = " Ошибка получения лога событий - " + ex;
+            Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         } finally {
             if (reader != null && !reader.isClosed())
                 reader.close();
@@ -526,7 +560,9 @@ public class DbWorker extends SQLiteOpenHelper implements INetworkModelOps, IGet
         try {
             return CurrentDb.delete("EVENT_LOG_TBL", null, null) > 0;
         } catch (Exception ex) {
-            Log.e(LOG_TAG, "Ошибка очистки лога событий - " + ex.getMessage());
+            String error = " Ошибка очистки лога событий - " + ex.getMessage();
+            Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
         }
 
         return false;

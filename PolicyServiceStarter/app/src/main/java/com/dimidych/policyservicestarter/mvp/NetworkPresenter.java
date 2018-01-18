@@ -16,14 +16,11 @@ import java.util.Map;
 public class NetworkPresenter implements INetworkPresenterOps, INetworkPresenterRequiredOps {
     private WeakReference<IViewRequiredOps> _view;
     private INetworkModelOps _model;
-    private boolean _isChangingConfig;
-    private Context _ctx;
     private String LOG_TAG = getClass().getSimpleName();
 
     public NetworkPresenter(IViewRequiredOps view, Context ctx) {
-        _ctx = ctx;
-        _view = new WeakReference<IViewRequiredOps>(view);
-        _model = new DbWorker(_ctx, this);
+        _view = new WeakReference<>(view);
+        _model = new DbWorker(ctx, this);
     }
 
     @Override
@@ -66,9 +63,13 @@ public class NetworkPresenter implements INetworkPresenterOps, INetworkPresenter
     @Override
     public void onDestroy(boolean isChangingConfig) {
         _view = null;
-        _isChangingConfig = isChangingConfig;
 
         if (!isChangingConfig)
             _model.onDestroy();
+    }
+
+    @Override
+    public void onSetEventLog(String message, String eventName, long documentId) {
+        _model.onSetLog(message,eventName,documentId);
     }
 }

@@ -103,8 +103,9 @@ public class NetworkFragment extends MvpFragment implements View.OnClickListener
                     break;
             }
         } catch (Exception ex) {
-            String strErr = "Error in onClick - " + ex.getMessage();
+            String strErr = " Error in onClick - " + ex.getMessage();
             Log.d(TAG, strErr);
+            _presenter.onSetEventLog(TAG + strErr, "Error", -1);
         }
     }
 

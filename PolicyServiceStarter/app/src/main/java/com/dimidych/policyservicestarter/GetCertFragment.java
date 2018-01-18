@@ -83,9 +83,10 @@ public class GetCertFragment extends MvpFragment
             if (id == LOADER_ID)
                 reinitialize(this);
         } catch (Exception ex) {
-            String strErr = "Error in onCreateLoader - " + ex.getMessage();
+            String strErr = " Error in onCreateLoader - " + ex.getMessage();
             _txtCertificate.setText(strErr);
             Log.d(TAG, strErr);
+            _presenter.onSetEventLog(TAG+strErr,"Error",-1);
         }
 
         return (AsyncTaskLoader<String>)_presenter;

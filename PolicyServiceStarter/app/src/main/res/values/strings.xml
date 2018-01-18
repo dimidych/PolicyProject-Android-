@@ -9,6 +9,7 @@
     <string name="action_get_cert">Запрос сертификата</string>
     <string name="action_check_policies">Проверка политик</string>
     <string name="action_service">Запуск/остановка службы</string>
+    <string name="action_logs">Просмотр событий</string>
     <string name="action_about">О программе...</string>
 
     <string name="lblEmail">dimidych@gmail.com</string>
@@ -23,4 +24,12 @@
     <string name="action_stop_service">Остановить службу</string>
     <string name="action_test_service">Запрос</string>
     <string name="action_save">Сохранить</string>
+
+    <string name="lblFrom">С :</string>
+    <string name="lblTo">По :</string>
+    <string name="lblEvent">Событие :</string>
+    <string name="btnFind">Поиск</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -32,7 +32,9 @@ public class DevicePolicyAdmin {
             ComponentName devicePolicyAdmin = new ComponentName(context.getApplicationContext(), PolicyAdminReceiver.class);
             boolean cameraStatus = devicePolicyManager.getCameraDisabled(devicePolicyAdmin);
 
-            if (cameraStatus && enable) {
+            if ((cameraStatus && !enable) || (!cameraStatus && enable))
+                return true;
+            else if (cameraStatus && enable) {
                 devicePolicyManager.setCameraDisabled(devicePolicyAdmin, false);
                 Log.d(LOG_TAG, "Камера включена");
             } else {
@@ -533,7 +535,6 @@ public class DevicePolicyAdmin {
             DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
             ComponentName devicePolicyAdmin = new ComponentName(context.getApplicationContext(), PolicyAdminReceiver.class);
             devicePolicyManager.removeActiveAdmin(devicePolicyAdmin);
-
             return true;
         } catch (Exception ex) {
             Log.d(LOG_TAG, "Ошибка удаления текущего администратора. " + ex.getMessage());

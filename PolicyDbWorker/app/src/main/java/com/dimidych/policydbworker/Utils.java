@@ -21,7 +21,7 @@ public class Utils {
         if (counter != 0)
             throw new Exception("Не удалось установить соединение с удаленым сервером");
 
-        DeviceInfo devInfo = DeviceInfo.getDeviceInfo(context);
-        return new String[]{serverIpAddress, serverPort, devInfo == null || devInfo.DeviceSerial == null ? "cb5a1xnerw" : devInfo.DeviceSerial};
+        DeviceInfo devInfo = DeviceInfo.getDeviceInfo();
+        return new String[]{serverIpAddress, serverPort, devInfo == null || devInfo.DeviceSerial == null ? "4cc156590604" : devInfo.DeviceSerial};
     }
 }

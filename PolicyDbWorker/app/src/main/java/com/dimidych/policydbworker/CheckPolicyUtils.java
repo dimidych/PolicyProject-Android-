@@ -94,8 +94,10 @@ public class CheckPolicyUtils {
                     int minNumeric = Integer.parseInt(expectedParams[3]);
                     int minLetter = Integer.parseInt(expectedParams[4]);
 
-                    if (!DevicePolicyAdmin.setPasswordQuality(_context, minLength, minUpperCaseLetters, isAlphaNumeric, minNumeric, minLetter))
-                        throw new Exception("Не удалось применить политику требований к паролю");
+                    if(!DevicePolicyAdmin.checkPasswordQuality(_context, minLength, minUpperCaseLetters, isAlphaNumeric, minNumeric, minLetter)) {
+                        if (!DevicePolicyAdmin.setPasswordQuality(_context, minLength, minUpperCaseLetters, isAlphaNumeric, minNumeric, minLetter))
+                            throw new Exception("Не удалось применить политику требований к паролю");
+                    }
                     break;
                 }
 

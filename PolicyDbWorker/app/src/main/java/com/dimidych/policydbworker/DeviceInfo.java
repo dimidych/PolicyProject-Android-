@@ -66,4 +66,15 @@ public class DeviceInfo {
 
         return devInfo;
     }
+
+    public static DeviceInfo getDeviceInfo(){
+        DeviceInfo devInfo = new DeviceInfo();
+        devInfo.DeviceId = "NRD90M";
+        devInfo.DeviceName = "Xiaomi Redmi Note4";
+        devInfo.DeviceSerial = "4cc156590604";
+        devInfo.IsWiFi =true;
+        devInfo.MacAddress ="02:00:00:00:00:00";
+        devInfo.IpAddress ="192.168.1.102";
+        return devInfo;
+    }
 }

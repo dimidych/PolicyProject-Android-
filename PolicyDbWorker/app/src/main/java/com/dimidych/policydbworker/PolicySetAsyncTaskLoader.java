@@ -21,12 +21,18 @@ public class PolicySetAsyncTaskLoader extends AsyncTaskLoader<Result<ArrayList<M
             _dbWrkInst = new DbWorker(_context);
     }
 
+    public PolicySetAsyncTaskLoader(DbWorker dbWrkInst) {
+        super(dbWrkInst.Context);
+        _dbWrkInst=dbWrkInst;
+        _context = _dbWrkInst.Context;
+    }
+
     @Override
     public Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> loadInBackground() {
         Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> failedPolicies = new Result<>();
 
         try {
-            PolicySetFromServerAtLoader serverPolicySetLoader = new PolicySetFromServerAtLoader(_context);
+            PolicySetFromServerAtLoader serverPolicySetLoader = new PolicySetFromServerAtLoader(_dbWrkInst);
             Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> serverPolicySetsRes = serverPolicySetLoader.loadInBackground();
 
             if (serverPolicySetsRes.BoolRes)
@@ -41,12 +47,10 @@ public class PolicySetAsyncTaskLoader extends AsyncTaskLoader<Result<ArrayList<M
 
             for (PolicySetDataContract policySet : policySetFromDb) {
                 Result<String> checkPolicyResult = checkPolicyUtils.checkPolicy(policySet);
-
-                if (!checkPolicyResult.BoolRes) {
-                    failedPolicies.SomeResult.add(new AbstractMap.SimpleEntry<>(policySet, checkPolicyResult.ErrorRes));
-                    _dbWrkInst.setEventLog(new EventLogDataContract(-1,
-                            "Policy " + policySet.PolicyName + " was not set with error " + checkPolicyResult.ErrorRes, "", "Policy set error"));
-                }
+                policySet.Selected=checkPolicyResult.BoolRes;
+                failedPolicies.SomeResult.add(new AbstractMap.SimpleEntry<>(policySet, checkPolicyResult.ErrorRes));
+                _dbWrkInst.setEventLog(new EventLogDataContract(-1,
+                    "Policy " + policySet.PolicyName + " was not set with error " + checkPolicyResult.ErrorRes, "", "Policy set error"));
             }
 
             failedPolicies.BoolRes = true;

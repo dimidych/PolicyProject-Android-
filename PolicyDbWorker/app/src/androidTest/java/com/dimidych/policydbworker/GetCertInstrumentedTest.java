@@ -1,11 +1,10 @@
 package com.dimidych.policydbworker;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 
 import com.dimidych.policydbworker.mvp.ICheckPolicyPresenterRequiredOps;
@@ -62,7 +61,7 @@ public class GetCertInstrumentedTest {
     @Test
     public void getPolicySetFromServiceTest() {
         Context appContext = InstrumentationRegistry.getTargetContext();
-        DevicePolicyAdmin.requestAdminService(new MockActivity(), new ComponentName(appContext,
+        DevicePolicyAdmin.requestAdminService(new Activity(), new ComponentName(appContext,
                 PolicyAdminReceiver.class));
 
         CheckPolicyUtils checkPolicyUtils = new CheckPolicyUtils(appContext);
@@ -123,10 +122,4 @@ public class GetCertInstrumentedTest {
         }
     }
 
-    class MockActivity extends AppCompatActivity{
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-        }
-    }
 }

@@ -1,24 +1,27 @@
 package com.dimidych.policyservicestarter;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
+import android.widget.Button;
+import android.widget.TextView;
 
-import com.dimidych.policydbworker.PolicySetDataContract;
+import com.dimidych.policydbworker.EventLogDataContract;
 
-class PolicySetAdapter extends BaseAdapter {
+public class LogViewerAdapter extends BaseAdapter {
     private LayoutInflater _inflater;
-    private PolicySetDataContract[] _policySetArr;
-    private final String LOG_TAG = "PolicySetAdapter";
+    private EventLogDataContract[] _eventArray;
+    private final String LOG_TAG = "LogViewerAdapter";
+    private final Context _context;
 
-    PolicySetAdapter(Context context, PolicySetDataContract[] policySetArr) {
-        _policySetArr = policySetArr;
+    public LogViewerAdapter(Context context, EventLogDataContract[] eventArray) {
+        _eventArray = eventArray;
         _inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        _context = context;
     }
 
     @Override
@@ -26,10 +29,10 @@ class PolicySetAdapter extends BaseAdapter {
         int result;
 
         try {
-            if (_policySetArr == null)
+            if (_eventArray == null)
                 throw new Exception("Пустой набор данных");
 
-            result = _policySetArr.length;
+            result = _eventArray.length;
         } catch (Exception ex) {
             String strErr = "Ошибка получения количества - " + ex.getMessage();
             Log.d(LOG_TAG, strErr);
@@ -44,10 +47,10 @@ class PolicySetAdapter extends BaseAdapter {
         Object result;
 
         try {
-            if (_policySetArr == null)
+            if (_eventArray == null)
                 throw new Exception("Пустой набор данных");
 
-            result = _policySetArr[position];
+            result = _eventArray[position];
         } catch (Exception ex) {
             String strErr = "Ошибка получения элемента - " + ex.getMessage();
             Log.d(LOG_TAG, strErr);
@@ -62,13 +65,13 @@ class PolicySetAdapter extends BaseAdapter {
         long result;
 
         try {
-            if (_policySetArr == null)
+            if (_eventArray == null)
                 throw new Exception("Пустой набор данных");
 
-            if (_policySetArr.length == 0 && position >= _policySetArr.length)
+            if (_eventArray.length == 0 && position >= _eventArray.length)
                 throw new Exception("Пустой набор данных");
 
-            result = _policySetArr[position].PolicySetId;
+            result = _eventArray[position].EventId;
         } catch (Exception ex) {
             String strErr = "Ошибка получения ид элемента - " + ex.getMessage();
             Log.d(LOG_TAG, strErr);
@@ -84,20 +87,26 @@ class PolicySetAdapter extends BaseAdapter {
 
         try {
             if (resultView == null)
-                resultView = _inflater.inflate(R.layout.layout_policy_item, parent, false);
+                resultView = _inflater.inflate(R.layout.layout_event_item, parent, false);
 
-            if ((_policySetArr == null || _policySetArr.length == 0 || position >= _policySetArr.length))
+            if ((_eventArray == null || _eventArray.length == 0 || position >= _eventArray.length))
                 throw new Exception("Несоответствие набора записей");
 
-            PolicySetDataContract policySet = _policySetArr[position];
-            CheckBox chkPolicy = (CheckBox) resultView.findViewById(R.id.chkPolicy);
-            chkPolicy.setText(policySet.PolicyName);
-            chkPolicy.setChecked(policySet.Selected);
-            int[] colors = new int[]{Color.parseColor("#ffffffff"), Color.parseColor("#ffd6d7d7"), Color.parseColor("#ffffbb33")};
-            resultView.setBackgroundColor(colors[position % 2]);
-
-            if (!policySet.Selected)
-                resultView.setBackgroundColor(colors[2]);
+            final EventLogDataContract eventLog = _eventArray[position];
+            Button btnEventLog = (Button) resultView.findViewById(R.id.btnDate);
+            btnEventLog.setText("" + eventLog.EventLogDate);
+            btnEventLog.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(_context, EventLogRecordFragment.class);
+                            intent.putExtra(EventLogDataContract.class.getCanonicalName(), eventLog);
+                            _context.startActivity(intent);
+                        }
+                    }
+            );
+            TextView txtEventName = (TextView) resultView.findViewById(R.id.txtEventName);
+            txtEventName.setText(eventLog.EventName);
         } catch (Exception ex) {
             String strErr = "Ошибка cоздания списка  - " + ex.getMessage();
             Log.d(LOG_TAG, strErr);

@@ -15,15 +15,12 @@ public class GetCertPresenter extends AsyncTaskLoader<String>
         implements IGetCertPresenterOps, IGetCertPresenterRequiredOps {
     private WeakReference<IViewRequiredOps> _view;
     private IGetCertModelOps _model;
-    private boolean _isChangingConfig;
-    private Context _ctx;
     private static final String LOG_TAG = "GetCertPresenter";
 
     public GetCertPresenter(IViewRequiredOps view, Context context) {
         super(context);
-        _ctx = context;
         _view = new WeakReference<>(view);
-        _model = new DbWorker(_ctx, this);
+        _model = new DbWorker(context, this);
     }
 
     @Override
@@ -34,15 +31,19 @@ public class GetCertPresenter extends AsyncTaskLoader<String>
     @Override
     public void onDestroy(boolean isChangingConfig) {
         _view = null;
-        _isChangingConfig = isChangingConfig;
 
         if (!isChangingConfig)
             _model.onDestroy();
     }
 
     @Override
+    public void onSetEventLog(String message, String eventName, long documentId) {
+        _model.onSetLog(message,eventName,documentId);
+    }
+
+    @Override
     public String getCertificateFromServer() {
-        GetLoginInfoAsyncTaskLoader certificateLoader = new GetLoginInfoAsyncTaskLoader(_ctx);
+        GetLoginInfoAsyncTaskLoader certificateLoader = new GetLoginInfoAsyncTaskLoader((DbWorker)_model);
         String cert = certificateLoader.loadInBackground().SomeResult.getValue();
         _model.updateCertificate(cert);
         return cert;

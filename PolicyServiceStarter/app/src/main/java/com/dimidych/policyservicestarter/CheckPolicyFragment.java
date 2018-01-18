@@ -49,7 +49,7 @@ public class CheckPolicyFragment extends MvpFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_get_cert, container, false);
+        View view = inflater.inflate(R.layout.fragment_check_policy, container, false);
         _txtStatus = (TextView) view.findViewById(R.id.txtStatus);
         _lstCheckedPolicies = (ListView) view.findViewById(R.id.lstCheckedPolicies);
         _loader = getLoaderManager().initLoader(LOADER_ID, null, this);
@@ -87,9 +87,10 @@ public class CheckPolicyFragment extends MvpFragment
             if (id == LOADER_ID)
                 reinitialize(this);
         } catch (Exception ex) {
-            String strErr = "Error in onCreateLoader - " + ex.getMessage();
+            String strErr = " Error in onCreateLoader - " + ex.getMessage();
             _txtStatus.setText(strErr);
             Log.d(TAG, strErr);
+            _presenter.onSetEventLog(TAG+strErr,"Error",-1);
         }
 
         return (Loader<PolicySetDataContract[]>) _presenter;
@@ -100,17 +101,20 @@ public class CheckPolicyFragment extends MvpFragment
         switch (loader.getId()) {
             case LOADER_ID:
                 try {
-                    if(data==null||data.length<1)
-                        throw new Exception("Пустой список политик");
+                    if (data == null || data.length < 1) {
+                        _txtStatus.setText("Все политики прошли проверку");
+                        return;
+                    }
 
                     _policySetAdapter = new PolicySetAdapter(getContext(), data);
                     _lstCheckedPolicies.setAdapter(_policySetAdapter);
                     _policySetAdapter.notifyDataSetChanged();
-                    _txtStatus.setText("Success");
+                    _txtStatus.setText("Выполнено");
                 } catch (Exception ex) {
-                    String strErr = "Error in onClick - " + ex.getMessage();
+                    String strErr = " Error in onClick - " + ex.getMessage();
                     _txtStatus.setText(strErr);
                     Log.d(TAG, strErr);
+                    _presenter.onSetEventLog(TAG+strErr,"Error",-1);
                 }
                 break;
         }

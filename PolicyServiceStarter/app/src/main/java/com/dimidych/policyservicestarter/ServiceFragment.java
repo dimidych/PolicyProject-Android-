@@ -57,15 +57,18 @@ public class ServiceFragment extends MvpFragment
             switch (view.getId()) {
                 case R.id.btnStartService:
                     _txtLog.setText(_presenter.startService());
+                    _presenter.onSetEventLog(TAG + "Служба запущена", "Уведомление", -1);
                     break;
 
                 case R.id.btnStopService:
                     _txtLog.setText(_presenter.stopService());
+                    _presenter.onSetEventLog(TAG + "Служба остановлена", "Уведомление", -1);
                     break;
             }
         } catch (Exception ex) {
-            String strErr = "Error in onClick - " + ex.getMessage();
+            String strErr = " Error in onClick - " + ex.getMessage();
             Log.d(TAG, strErr);
+            _presenter.onSetEventLog(TAG + strErr, "Error", -1);
         }
     }
 

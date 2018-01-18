@@ -24,6 +24,12 @@ public class GetLoginInfoAsyncTaskLoader extends AsyncTaskLoader<Result<Map.Entr
             _dbWrkInst = new DbWorker(_context);
     }
 
+    public GetLoginInfoAsyncTaskLoader(DbWorker dbWrkInst) {
+        super(dbWrkInst.Context);
+        _dbWrkInst = dbWrkInst;
+        _context = _dbWrkInst.Context;
+    }
+
     @Override
     public Result<Map.Entry<String, String>> loadInBackground() {
         Result<Map.Entry<String, String>> result = new Result<>();
@@ -56,8 +62,9 @@ public class GetLoginInfoAsyncTaskLoader extends AsyncTaskLoader<Result<Map.Entr
             result.SomeResult = new AbstractMap.SimpleEntry<>(loginInfo.SomeResult[0], loginInfo.SomeResult[1]);
             result.BoolRes = true;
         } catch (Exception ex) {
-            result.ErrorRes = ex.getMessage();
+            result.ErrorRes = " error in GetLoginInfoAsyncTaskLoader - " + ex.getMessage();
             Log.e(LOG_TAG, result.ErrorRes);
+            _dbWrkInst.onSetLog(result.ErrorRes, "Error", -1);
         }
 
         return result;

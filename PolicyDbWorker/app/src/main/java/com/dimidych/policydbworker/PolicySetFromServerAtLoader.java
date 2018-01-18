@@ -22,6 +22,12 @@ public class PolicySetFromServerAtLoader extends AsyncTaskLoader<Result<ArrayLis
             _dbWrkInst = new DbWorker(_context);
     }
 
+    public PolicySetFromServerAtLoader(DbWorker dbWrkInst) {
+        super(dbWrkInst.Context);
+        _dbWrkInst=dbWrkInst;
+        _context = _dbWrkInst.Context;
+    }
+
     @Override
     public Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> loadInBackground() {
         Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> failedPolicies = new Result<>();
@@ -37,7 +43,7 @@ public class PolicySetFromServerAtLoader extends AsyncTaskLoader<Result<ArrayLis
             Result<PolicySetDataContract[]> policySetServiceResult = GetPolicySetAsyncTask.getPolicySet(
                     devinfo[0], devinfo[1], devinfo[2]);
 
-            if (!policySetServiceResult.BoolRes || TextUtils.isEmpty(policySetServiceResult.ErrorRes)
+            if (!policySetServiceResult.BoolRes || !TextUtils.isEmpty(policySetServiceResult.ErrorRes)
                     || policySetServiceResult.SomeResult == null || policySetServiceResult.SomeResult.length < 1)
                 throw new Exception("Сервис не вернул результат. " + policySetServiceResult.ErrorRes);
 
@@ -53,12 +59,10 @@ public class PolicySetFromServerAtLoader extends AsyncTaskLoader<Result<ArrayLis
                 }
 
                 Result<String> checkPolicyResult = checkPolicyUtils.checkPolicy(servicePolicySet);
-
-                if (!checkPolicyResult.BoolRes) {
-                    failedPolicies.SomeResult.add(new AbstractMap.SimpleEntry<>(servicePolicySet, checkPolicyResult.ErrorRes));
-                    _dbWrkInst.setEventLog(new EventLogDataContract(-1,
-                            "Policy " + servicePolicySet.PolicyName + " was not set with error " + checkPolicyResult.ErrorRes, "", "Policy set error"));
-                }
+                servicePolicySet.Selected=checkPolicyResult.BoolRes;
+                failedPolicies.SomeResult.add(new AbstractMap.SimpleEntry<>(servicePolicySet, checkPolicyResult.ErrorRes));
+                _dbWrkInst.setEventLog(new EventLogDataContract(-1,
+                    "Policy " + servicePolicySet.PolicyName + " was not set with error " + checkPolicyResult.ErrorRes, "", "Policy set error"));
             }
 
             failedPolicies.BoolRes=true;

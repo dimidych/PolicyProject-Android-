@@ -14,11 +14,10 @@ public class PolicyAdminReceiver extends DeviceAdminReceiver {
     @Override
     public void onEnabled(Context context, Intent intent) {
         super.onEnabled(context, intent);
-        Toast.makeText(
-                context,
-                "Включены политики администрирования устройства",
-                Toast.LENGTH_LONG).show();
-        Log.e(LOG_TAG, "Включены политики администрирования устройства");
+        String msg = "Включены политики администрирования устройства";
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+        Log.e(LOG_TAG, msg);
+        new DbWorker(context).onSetLog(msg, "Success", -1);
     }
 
     @Override
@@ -30,21 +29,19 @@ public class PolicyAdminReceiver extends DeviceAdminReceiver {
     @Override
     public void onDisabled(Context context, Intent intent) {
         super.onDisabled(context, intent);
-        Toast.makeText(
-                context,
-                "Выключены политики администрирования устройства",
-                Toast.LENGTH_LONG).show();
-        Log.e(LOG_TAG, "Выключены политики администрирования устройства");
+        String msg = "Выключены политики администрирования устройства";
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+        Log.e(LOG_TAG, msg);
+        new DbWorker(context).onSetLog(msg, "Success", -1);
     }
 
     @Override
     public void onPasswordChanged(Context context, Intent intent) {
         super.onPasswordChanged(context, intent);
-        Toast.makeText(
-                context,
-                "Пароль изменен",
-                Toast.LENGTH_LONG).show();
-        Log.e(LOG_TAG, "Пароль изменен");
+        String msg = "Пароль изменен";
+        Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+        Log.e(LOG_TAG, msg);
+        new DbWorker(context).onSetLog(msg, "Success", -1);
     }
 
     @Override
@@ -74,7 +71,7 @@ public class PolicyAdminReceiver extends DeviceAdminReceiver {
     }
 
     @Override
-    public void onPasswordFailed(Context context, Intent intent){
-        super.onPasswordFailed(context,intent);
+    public void onPasswordFailed(Context context, Intent intent) {
+        super.onPasswordFailed(context, intent);
     }
 }

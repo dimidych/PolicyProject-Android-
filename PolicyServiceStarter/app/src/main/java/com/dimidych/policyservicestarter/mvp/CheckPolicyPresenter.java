@@ -1,7 +1,7 @@
 package com.dimidych.policyservicestarter.mvp;
 
-import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.dimidych.policydbworker.DbWorker;
@@ -19,15 +19,13 @@ public class CheckPolicyPresenter extends AsyncTaskLoader<PolicySetDataContract[
         implements ICheckPolicyPresenterOps, ICheckPolicyPresenterRequiredOps {
     private WeakReference<IViewRequiredOps> _view;
     private ICheckPolicyModelOps _model;
-    private boolean _isChangingConfig;
-    private Context _ctx;
+
     private String LOG_TAG = getClass().getSimpleName();
 
     public CheckPolicyPresenter(IViewRequiredOps view, Context context) {
         super(context);
-        _ctx = context;
         _view = new WeakReference<>(view);
-        _model = new DbWorker(_ctx, this);
+        _model = new DbWorker(context, this);
     }
 
     @Override
@@ -56,16 +54,20 @@ public class CheckPolicyPresenter extends AsyncTaskLoader<PolicySetDataContract[
     @Override
     public void onDestroy(boolean isChangingConfig) {
         _view = null;
-        _isChangingConfig = isChangingConfig;
 
         if (!isChangingConfig)
             _model.onDestroy();
     }
 
     @Override
+    public void onSetEventLog(String message, String eventName, long documentId) {
+        _model.onSetLog(message,eventName,documentId);
+    }
+
+    @Override
     public PolicySetDataContract[] getPolicySetFromService() {
         try {
-            PolicySetFromServerAtLoader serverPolicySetLoader = new PolicySetFromServerAtLoader(_ctx);
+            PolicySetFromServerAtLoader serverPolicySetLoader = new PolicySetFromServerAtLoader((DbWorker) _model);
             Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> serverPolicySetRes = serverPolicySetLoader.loadInBackground();
 
             if (!serverPolicySetRes.BoolRes)
@@ -82,6 +84,7 @@ public class CheckPolicyPresenter extends AsyncTaskLoader<PolicySetDataContract[
             return result;
         } catch (Exception ex) {
             onError(ex.toString());
+
             return null;
         }
     }

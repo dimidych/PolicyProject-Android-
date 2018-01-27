@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.IBinder;
 
 import com.dimidych.policydbworker.DbWorker;
+import com.dimidych.policydbworker.EventLogDataContract;
 import com.dimidych.policydbworker.PolicySetAsyncTaskLoader;
 import com.dimidych.policydbworker.PolicySetDataContract;
 import com.dimidych.policydbworker.Result;
@@ -20,12 +21,12 @@ public class PolicyService extends Service {
     private DbWorker _model;
 
     public PolicyService() {
-        _model = new DbWorker(this);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        _model = new DbWorker(this);
         _executor = Executors.newFixedThreadPool(4);
         _model.onSetLog("PolicyService created", "Уведомление", -1);
     }
@@ -36,9 +37,14 @@ public class PolicyService extends Service {
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
-        PolicySetAsyncTask policySetAsyncTask = new PolicySetAsyncTask(startId, this);
-        _executor.execute(policySetAsyncTask);
-        _model.onSetLog("PolicyService starts execution", "Уведомление", -1);
+        try {
+            PolicySetAsyncTask policySetAsyncTask = new PolicySetAsyncTask(startId, this);
+            _executor.execute(policySetAsyncTask);
+            _model.onSetLog("PolicyService starts execution", "Уведомление", -1);
+        } catch (Exception ex) {
+            _model.setEventLog(new EventLogDataContract(-1, "Ошибка запуска службы. " + ex, "", "Error"));
+        }
+
         return START_STICKY;//super.onStartCommand(intent, flags, startId);
     }
 
@@ -64,7 +70,7 @@ public class PolicyService extends Service {
                 while (true) {
                     Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> result = policySetAtLoader.loadInBackground();
 
-                    if (!result.BoolRes)
+                    if (result != null && !result.BoolRes)
                         _model.onSetLog("PolicyService iteration finished with error " + result.ErrorRes, "Error", -1);
 
                     Thread.sleep(60000);

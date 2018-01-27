@@ -66,12 +66,15 @@ public class LogViewerFragment extends MvpFragment
         _btnFrom.setOnClickListener(this);
         _btnTo.setOnClickListener(this);
         _btnFind.setOnClickListener(this);
+        _loader = getLoaderManager().initLoader(LOADER_ID, null, this);
         return view;
     }
 
-    private void InitLoader() {
-        Bundle args = CreateBundle();
-        _loader = getLoaderManager().initLoader(LOADER_ID, args, this);
+    private void reinitLoader() {
+        LogViewerPresenter presenter = (LogViewerPresenter) _presenter;
+        presenter.FromDate = _btnFrom.getText().toString();
+        presenter.ToDate = _btnTo.getText().toString();
+        presenter.EventName = _txtEvent.getText().toString();
         _loader.onContentChanged();
     }
 
@@ -93,10 +96,9 @@ public class LogViewerFragment extends MvpFragment
                 }
                 break;
 
-                case R.id.btnFind: {
-                    InitLoader();
-                }
-                break;
+                case R.id.btnFind:
+                    reinitLoader();
+                    break;
             }
         } catch (Exception ex) {
             String strErr = " Error in onClick - " + ex.getMessage();
@@ -157,18 +159,10 @@ public class LogViewerFragment extends MvpFragment
         }
     }
 
-    private String getStringDatePresent(Calendar clndr) {
+    public static String getStringDatePresent(Calendar clndr) {
         String month = (clndr.get(Calendar.MONTH) + 1) < 10 ? ("0" + (clndr.get(Calendar.MONTH) + 1)) : ((clndr.get(Calendar.MONTH) + 1) + "");
         String day = clndr.get(Calendar.DAY_OF_MONTH) < 10 ? ("0" + clndr.get(Calendar.DAY_OF_MONTH)) : (clndr.get(Calendar.DAY_OF_MONTH) + "");
         return "" + clndr.get(Calendar.YEAR) + "-" + month + "-" + day;
-    }
-
-    private Bundle CreateBundle() {
-        Bundle args = new Bundle();
-        args.putLong(LogViewerPresenter.FromDateInMillis, _clndrFrom.getTimeInMillis());
-        args.putLong(LogViewerPresenter.ToDateInMillis, _clndrTo.getTimeInMillis());
-        args.putString(LogViewerPresenter.EventName, _txtEvent.getText().toString());
-        return args;
     }
 
     @Override
@@ -195,7 +189,7 @@ public class LogViewerFragment extends MvpFragment
                         return;
                     }
 
-                    LogViewerAdapter logViewerAdapter = new LogViewerAdapter(getContext(), data);
+                    LogViewerAdapter logViewerAdapter = new LogViewerAdapter(getContext(), data, getActivity().getFragmentManager());
                     _lstEvent.setAdapter(logViewerAdapter);
                     logViewerAdapter.notifyDataSetChanged();
                 } catch (Exception ex) {

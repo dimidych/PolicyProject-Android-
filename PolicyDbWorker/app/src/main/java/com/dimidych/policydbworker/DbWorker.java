@@ -459,53 +459,76 @@ public class DbWorker extends SQLiteOpenHelper
         return null;
     }
 
+    public boolean deletePolicySetFromDb(long policyId) {
+        try {
+            boolean result=(CurrentDb.delete("POLICY_SET_TBL", "policy_id=?", new String[]{"" + policyId}) > 0);
+            return result;
+        } catch (Exception ex) {
+            String error = " Ошибка удаления политики - " + ex.getMessage();
+            Log.e(LOG_TAG, error);
+            onSetLog(LOG_TAG + error, "Error", -1);
+            return false;
+        }
+    }
+
     public EventLogDataContract[] getEventLog(String fromDate, String toDate, long documentId, String eventName) {
         Cursor reader = null;
 
         try {
             String query = "select event_log_id, event_log_date, event_name, document_id, message, login from EVENT_LOG_TBL ";
             int paramCounter = 0;
-            String[] queryParams = new String[4];
+            ArrayList<String> queryParamLst = new ArrayList<>();
             Calendar fromCalendar = Calendar.getInstance();
             Calendar toCalendar = Calendar.getInstance();
             long fromDateInMillis = 0;
             long toDateInMillis = 0;
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-            try {
-                fromCalendar.setTime(sdf.parse(fromDate));
-                fromDateInMillis = fromCalendar.getTimeInMillis();
-            } catch (Exception ex) {
-            }
+            if (!TextUtils.isEmpty(fromDate))
+                try {
+                    fromCalendar.setTime(sdf.parse(fromDate));
+                    fromDateInMillis = fromCalendar.getTimeInMillis();
+                } catch (Exception ex) {
+                    Log.e(LOG_TAG, "error converting date from " + ex);
+                }
 
-            try {
-                toCalendar.setTime(sdf.parse(toDate));
-                toDateInMillis = toCalendar.getTimeInMillis();
-            } catch (Exception ex) {
-            }
+            if (!TextUtils.isEmpty(toDate))
+                try {
+                    toCalendar.setTime(sdf.parse(toDate));
+                    toDateInMillis = toCalendar.getTimeInMillis();
+                } catch (Exception ex) {
+                    Log.e(LOG_TAG, "error converting date to " + ex);
+                }
 
             if (fromDateInMillis > 0) {
                 query += paramCounter > 0 ? " and event_log_date>=?" : " where event_log_date>=?";
-                queryParams[paramCounter] = fromDate;
+                queryParamLst.add(fromDate);
                 paramCounter++;
             }
 
             if (toDateInMillis > 0 && toDateInMillis > fromDateInMillis) {
                 query += paramCounter > 0 ? " and event_log_date<=?" : " where event_log_date<=?";
-                queryParams[paramCounter] = toDate;
+                queryParamLst.add(toDate);
                 paramCounter++;
             }
 
             if (documentId > 0) {
                 query += paramCounter > 0 ? " and document_id=?" : " where document_id=?";
-                queryParams[paramCounter] = "" + documentId;
+                queryParamLst.add("" + documentId);
                 paramCounter++;
             }
 
             if (!TextUtils.isEmpty(eventName)) {
                 query += paramCounter > 0 ? " and event_name=?" : " where event_name=?";
-                queryParams[paramCounter] = eventName;
+                queryParamLst.add(eventName);
                 paramCounter++;
+            }
+
+            String[] queryParams = null;
+
+            if (queryParamLst.size() > 0) {
+                queryParams = new String[queryParamLst.size()];
+                queryParamLst.toArray(queryParams);
             }
 
             reader = CurrentDb.rawQuery(query, queryParams);
@@ -519,7 +542,7 @@ public class DbWorker extends SQLiteOpenHelper
 
                 do {
                     EventLogDataContract res = new EventLogDataContract();
-                    SimpleDateFormat formatter = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss", Locale.getDefault());
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                     res.EventLogDate = formatter.parse(reader.getString(1));
                     res.EventName = reader.getString(2);
                     res.DocumentId = reader.getLong(3);
@@ -528,6 +551,8 @@ public class DbWorker extends SQLiteOpenHelper
                     result[counter] = res;
                     counter++;
                 } while (reader.moveToNext());
+
+                return result;
             }
         } catch (Exception ex) {
             String error = " Ошибка получения лога событий - " + ex;

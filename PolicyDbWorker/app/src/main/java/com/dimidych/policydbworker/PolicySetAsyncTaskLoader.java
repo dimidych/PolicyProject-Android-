@@ -23,7 +23,7 @@ public class PolicySetAsyncTaskLoader extends AsyncTaskLoader<Result<ArrayList<M
 
     public PolicySetAsyncTaskLoader(DbWorker dbWrkInst) {
         super(dbWrkInst.Context);
-        _dbWrkInst=dbWrkInst;
+        _dbWrkInst = dbWrkInst;
         _context = _dbWrkInst.Context;
     }
 
@@ -47,10 +47,10 @@ public class PolicySetAsyncTaskLoader extends AsyncTaskLoader<Result<ArrayList<M
 
             for (PolicySetDataContract policySet : policySetFromDb) {
                 Result<String> checkPolicyResult = checkPolicyUtils.checkPolicy(policySet);
-                policySet.Selected=checkPolicyResult.BoolRes;
+                policySet.Selected = checkPolicyResult.BoolRes;
                 failedPolicies.SomeResult.add(new AbstractMap.SimpleEntry<>(policySet, checkPolicyResult.ErrorRes));
                 _dbWrkInst.setEventLog(new EventLogDataContract(-1,
-                    "Policy " + policySet.PolicyName + " was not set with error " + checkPolicyResult.ErrorRes, "", "Policy set error"));
+                        "Policy " + policySet.PolicyName + " was not set with error " + checkPolicyResult.ErrorRes, "", "Policy set error"));
             }
 
             failedPolicies.BoolRes = true;

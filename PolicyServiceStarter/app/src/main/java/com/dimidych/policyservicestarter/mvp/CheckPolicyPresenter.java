@@ -17,6 +17,9 @@ import java.util.Map;
 
 public class CheckPolicyPresenter extends AsyncTaskLoader<PolicySetDataContract[]>
         implements ICheckPolicyPresenterOps, ICheckPolicyPresenterRequiredOps {
+    public final byte PolicyFromDb = 0;
+    public final byte CheckPolicy = 1;
+    public byte CurrentOperation;
     private WeakReference<IViewRequiredOps> _view;
     private ICheckPolicyModelOps _model;
 
@@ -61,7 +64,7 @@ public class CheckPolicyPresenter extends AsyncTaskLoader<PolicySetDataContract[
 
     @Override
     public void onSetEventLog(String message, String eventName, long documentId) {
-        _model.onSetLog(message,eventName,documentId);
+        _model.onSetLog(message, eventName, documentId);
     }
 
     @Override
@@ -84,13 +87,12 @@ public class CheckPolicyPresenter extends AsyncTaskLoader<PolicySetDataContract[
             return result;
         } catch (Exception ex) {
             onError(ex.toString());
-
             return null;
         }
     }
 
     @Override
     public PolicySetDataContract[] loadInBackground() {
-        return getPolicySetFromService();
+        return CurrentOperation == PolicyFromDb ? _model.getPolicySetFromDb() : getPolicySetFromService();
     }
 }

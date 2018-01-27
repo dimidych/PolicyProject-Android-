@@ -20,6 +20,15 @@ xmlns:tools="http://schemas.android.com/tools"
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".EventLogRecordFragment"
+            android:label="@string/aboutEvent"
+            android:parentActivityName="android.support.v4.app.FragmentActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="android.support.v4.app.FragmentActivity" />
+        </activity>
         <service
             android:name=".PolicyService"
             android:enabled="true"

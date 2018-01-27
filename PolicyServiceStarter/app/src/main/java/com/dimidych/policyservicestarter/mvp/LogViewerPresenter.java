@@ -16,12 +16,9 @@ public class LogViewerPresenter extends AsyncTaskLoader<EventLogDataContract[]>
     private WeakReference<IViewRequiredOps> _view;
     private IEventLogModelOps _model;
     private String LOG_TAG = getClass().getSimpleName();
-    public final static String FromDateInMillis = "FromDateInMillis";
-    public final static String ToDateInMillis = "ToDateInMillis";
-    public final static String EventName = "EventName";
-    public String _fromDate;
-    public String _toDate;
-    public String _eventName;
+    public String FromDate;
+    public String ToDate;
+    public String EventName;
 
     public LogViewerPresenter(IViewRequiredOps view, Context context) {
         super(context);
@@ -49,12 +46,12 @@ public class LogViewerPresenter extends AsyncTaskLoader<EventLogDataContract[]>
 
     @Override
     public void onSetEventLog(String message, String eventName, long documentId) {
-        _model.onSetLog(message,eventName,documentId);
+        _model.onSetLog(message, eventName, documentId);
     }
 
     @Override
     public EventLogDataContract[] loadInBackground() {
-        return getEventLog(_fromDate, _toDate, _eventName);
+        return getEventLog(FromDate, ToDate, EventName);
     }
 
     @Override

@@ -27,6 +27,7 @@ public class CheckPolicyFragment extends MvpFragment
     private TextView _txtStatus;
     private ListView _lstCheckedPolicies;
     private Button _btnCheckPolicies;
+    private Button _btnPoliciesInDb;
     private PolicySetAdapter _policySetAdapter;
     public static final int LOADER_ID = 2;
     private Loader<PolicySetDataContract[]> _loader;
@@ -55,6 +56,8 @@ public class CheckPolicyFragment extends MvpFragment
         _loader = getLoaderManager().initLoader(LOADER_ID, null, this);
         _btnCheckPolicies = (Button) view.findViewById(R.id.btnCheckPolicies);
         _btnCheckPolicies.setOnClickListener(this);
+        _btnPoliciesInDb = (Button) view.findViewById(R.id.btnPoliciesInDb);
+        _btnPoliciesInDb.setOnClickListener(this);
         return view;
     }
 
@@ -77,8 +80,16 @@ public class CheckPolicyFragment extends MvpFragment
     }
 
     @Override
-    public void onClick(View v) {
-        _loader.onContentChanged();
+    public void onClick(View view) {
+        try {
+            CheckPolicyPresenter presenter = (CheckPolicyPresenter) _presenter;
+            presenter.CurrentOperation = view.getId() == R.id.btnCheckPolicies ? presenter.CheckPolicy : presenter.PolicyFromDb;
+            _loader.onContentChanged();
+        } catch (Exception ex) {
+            String strErr = " Error in onClick - " + ex.getMessage();
+            Log.d(TAG, strErr);
+            _presenter.onSetEventLog(TAG + strErr, "Error", -1);
+        }
     }
 
     @Override
@@ -90,7 +101,7 @@ public class CheckPolicyFragment extends MvpFragment
             String strErr = " Error in onCreateLoader - " + ex.getMessage();
             _txtStatus.setText(strErr);
             Log.d(TAG, strErr);
-            _presenter.onSetEventLog(TAG+strErr,"Error",-1);
+            _presenter.onSetEventLog(TAG + strErr, "Error", -1);
         }
 
         return (Loader<PolicySetDataContract[]>) _presenter;
@@ -114,7 +125,7 @@ public class CheckPolicyFragment extends MvpFragment
                     String strErr = " Error in onClick - " + ex.getMessage();
                     _txtStatus.setText(strErr);
                     Log.d(TAG, strErr);
-                    _presenter.onSetEventLog(TAG+strErr,"Error",-1);
+                    _presenter.onSetEventLog(TAG + strErr, "Error", -1);
                 }
                 break;
         }

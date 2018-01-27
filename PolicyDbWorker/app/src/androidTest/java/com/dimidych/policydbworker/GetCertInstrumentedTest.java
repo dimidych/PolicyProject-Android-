@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RunWith(AndroidJUnit4.class)
@@ -97,6 +98,77 @@ public class GetCertInstrumentedTest {
         failedPolicies.BoolRes = true;
     }
 
+    @Test
+    public void getPolicySetFromServiceAtLoaderTest() {
+        Result<ArrayList<Map.Entry<PolicySetDataContract, String>>> failedPolicies = new Result<>();
+
+        try {
+            Context _context = InstrumentationRegistry.getTargetContext();
+            DbWorker _dbWrkInst = new DbWorker(_context, new CheckPolicyPresenterMock());
+            String[] devinfo = Utils.getDeviceInfoAndPing(_context);
+
+            if (devinfo == null || devinfo.length != 3)
+                throw new Exception("Ошибка сети");
+
+            failedPolicies.SomeResult = new ArrayList<>();
+            //policies for device from service
+            Result<PolicySetDataContract[]> policySetServiceResult = GetPolicySetAsyncTask.getPolicySet(
+                    devinfo[0], devinfo[1], devinfo[2]);
+
+            if (!policySetServiceResult.BoolRes || !TextUtils.isEmpty(policySetServiceResult.ErrorRes)
+                    || policySetServiceResult.SomeResult == null || policySetServiceResult.SomeResult.length < 1)
+                throw new Exception("Сервис не вернул результат. " + policySetServiceResult.ErrorRes);
+
+            //remove orphan policies from local db
+            PolicySetDataContract[] policiesFromDb = _dbWrkInst.getPolicySetFromDb();
+
+            if (policiesFromDb != null && policiesFromDb.length > 0) {
+                List<Integer> policiesToDelete = new ArrayList<>();
+
+                for (PolicySetDataContract dbPolicySet : policiesFromDb) {
+                    int counter = 0;
+
+                    for (PolicySetDataContract servicePolicySet : policySetServiceResult.SomeResult)
+                        if (servicePolicySet.PolicyId == dbPolicySet.PolicyId) {
+                            counter++;
+                            break;
+                        }
+
+                    if (counter == 0 && !policiesToDelete.contains(dbPolicySet.PolicyId))
+                        policiesToDelete.add(dbPolicySet.PolicyId);
+                }
+
+                if (policiesToDelete.size() > 0)
+                    for (int policyId : policiesToDelete)
+                        _dbWrkInst.deletePolicySetFromDb(policyId);
+            }
+
+            // first : try to add or update policies from service intolocal db
+            // then : try to check policies. failed policies will be thrown as result with log record
+            //CheckPolicyUtils checkPolicyUtils = new CheckPolicyUtils(_context);
+
+            for (PolicySetDataContract servicePolicySet : policySetServiceResult.SomeResult) {
+                PolicySetDataContract dbPolicySet = _dbWrkInst.getSinglePolicySetFromDb(servicePolicySet.PolicyId);
+
+                if (dbPolicySet == null) {
+                    if (!_dbWrkInst.addPolicySetToDb(servicePolicySet))
+                        throw new Exception("Не удалось вставить набор политик с ид " + servicePolicySet.PolicySetId);
+                } else {
+                    if (!_dbWrkInst.updatePolicySet(servicePolicySet, dbPolicySet))
+                        throw new Exception("Не удалось изменить набор политик с ид " + servicePolicySet.PolicySetId);
+                }
+
+                //Result<String> checkPolicyResult = checkPolicyUtils.checkPolicy(servicePolicySet);
+                //servicePolicySet.Selected = checkPolicyResult.BoolRes;
+                failedPolicies.SomeResult.add(new AbstractMap.SimpleEntry<>(servicePolicySet, ""));
+            }
+
+            failedPolicies.BoolRes = true;
+        } catch (Exception ex) {
+            failedPolicies.ErrorRes = "Server Policy set loader error. " + ex.getMessage();
+        }
+    }
+
     class CheckPolicyPresenterMock implements ICheckPolicyPresenterRequiredOps {
         @Override
         public void onAddPolicySetToDb(PolicySetDataContract policySet) {
@@ -122,4 +194,14 @@ public class GetCertInstrumentedTest {
         }
     }
 
+    @Test
+    public void LogMessageTest(){
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        DbWorker dbWrkInst = new DbWorker(appContext);
+        Assert.assertTrue("tst1 set failure",dbWrkInst.setEventLog(new EventLogDataContract(-1,"tst1 msg","","Error")));
+        Assert.assertTrue("tst2 set failure",dbWrkInst.setEventLog(new EventLogDataContract(-1,"tst2 msg","","Error")));
+        Assert.assertTrue("tst3 set failure",dbWrkInst.setEventLog(new EventLogDataContract(-1,"tst3 msg","","Error")));
+        EventLogDataContract[] result= dbWrkInst.getEventLog("","",-1,"");
+        Assert.assertTrue("no result",result!=null&&result.length>0);
+    }
 }

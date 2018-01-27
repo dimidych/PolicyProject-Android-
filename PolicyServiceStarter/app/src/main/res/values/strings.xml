@@ -7,10 +7,12 @@
     <string name="action_settings">Настройки</string>
     <string name="action_network_settings">Настройки сети</string>
     <string name="action_get_cert">Запрос сертификата</string>
+    <string name="action_db_policies">Политики в БД</string>
     <string name="action_check_policies">Проверка политик</string>
     <string name="action_service">Запуск/остановка службы</string>
     <string name="action_logs">Просмотр событий</string>
     <string name="action_about">О программе...</string>
+    <string name="action_disable_admin">Удалить политики администрирования</string>
 
     <string name="lblEmail">dimidych@gmail.com</string>
     <string name="lblAuthor">Автор : Кожомин Дмитрий</string>
@@ -29,7 +31,6 @@
     <string name="lblTo">По :</string>
     <string name="lblEvent">Событие :</string>
     <string name="btnFind">Поиск</string>
+    <string name="aboutEvent">О событии...</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

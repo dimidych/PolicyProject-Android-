@@ -1,7 +1,7 @@
 package com.dimidych.policyservicestarter;
 
+import android.app.FragmentManager;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,16 +12,22 @@ import android.widget.TextView;
 
 import com.dimidych.policydbworker.EventLogDataContract;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class LogViewerAdapter extends BaseAdapter {
     private LayoutInflater _inflater;
     private EventLogDataContract[] _eventArray;
     private final String LOG_TAG = "LogViewerAdapter";
     private final Context _context;
+    private final FragmentManager _fragmentManager;
 
-    public LogViewerAdapter(Context context, EventLogDataContract[] eventArray) {
+    public LogViewerAdapter(Context context, EventLogDataContract[] eventArray, FragmentManager fragmentManager) {
         _eventArray = eventArray;
         _inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         _context = context;
+        _fragmentManager = fragmentManager;
     }
 
     @Override
@@ -94,14 +100,18 @@ public class LogViewerAdapter extends BaseAdapter {
 
             final EventLogDataContract eventLog = _eventArray[position];
             Button btnEventLog = (Button) resultView.findViewById(R.id.btnDate);
-            btnEventLog.setText("" + eventLog.EventLogDate);
+            btnEventLog.setText(ConvertDateToString(eventLog.EventLogDate));
             btnEventLog.setOnClickListener(
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Intent intent = new Intent(_context, EventLogRecordFragment.class);
-                            intent.putExtra(EventLogDataContract.class.getCanonicalName(), eventLog);
-                            _context.startActivity(intent);
+                            try {
+                                EventLogRecordFragment eventRecFragment = new EventLogRecordFragment();
+                                eventRecFragment.EventLogRecord = eventLog;
+                                eventRecFragment.show(_fragmentManager, "Cобытие");
+                            } catch (Exception ex) {
+                                Log.d(LOG_TAG, ex.getMessage());
+                            }
                         }
                     }
             );
@@ -114,5 +124,10 @@ public class LogViewerAdapter extends BaseAdapter {
         }
 
         return resultView;
+    }
+
+    public static String ConvertDateToString(Date date){
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        return df.format(date);
     }
 }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.dimidych.policydbworker.DbWorker;
 import com.dimidych.policydbworker.mvp.IPresenterRequiredOps;
 import com.dimidych.policyservicestarter.PolicyService;
 
@@ -14,12 +13,12 @@ public class ServicePresenter implements IServicePresenterOps, IPresenterRequire
     private WeakReference<IViewRequiredOps> _view;
     private Context _context;
     private String LOG_TAG = getClass().getSimpleName();
-    private DbWorker _model;
+    //private DbWorker _model;
 
     public ServicePresenter(IViewRequiredOps view, Context context){
         _context = context;
         _view = new WeakReference<>(view);
-        _model=new DbWorker(context);
+        //_model=new DbWorker(context);
     }
 
     @Override
@@ -33,9 +32,7 @@ public class ServicePresenter implements IServicePresenterOps, IPresenterRequire
     }
 
     @Override
-    public void onSetEventLog(String message, String eventName, long documentId) {
-        _model.onSetLog(message,eventName,documentId);
-    }
+    public void onSetEventLog(String message, String eventName, long documentId) {}
 
     @Override
     public void onError(String errorMsg) {
